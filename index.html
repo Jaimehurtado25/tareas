@@ -95,7 +95,104 @@
             color: #fff;
             text-align: center;
             margin-top: 20px;
+            margin-bottom: 15px;
             font-size: 16px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .arrow-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            width: 150px;
+            height: 150px;
+        }
+
+        .arrow-btn {
+            background: #00ff88;
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+        }
+
+        .arrow-btn:active {
+            background: #00cc6f;
+            transform: scale(0.95);
+        }
+
+        .arrow-btn.up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .arrow-btn.down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .arrow-btn.left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .arrow-btn.right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .arrow-btn.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .arrow-btn.empty:active {
+            transform: none;
+        }
+
+        @media (max-width: 600px) {
+            #gameCanvas {
+                width: 100%;
+                max-width: 400px;
+                height: auto;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .game-header h1 {
+                font-size: 20px;
+            }
+
+            .score {
+                font-size: 20px;
+            }
+
+            .arrow-pad {
+                width: 120px;
+                height: 120px;
+            }
+
+            .arrow-btn {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -113,6 +210,19 @@
         </div>
         <div class="instructions">
             <p>La serpiente se mueve automáticamente. Usa las flechas para cambiar de dirección</p>
+        </div>
+        <div class="controls">
+            <div class="arrow-pad">
+                <button class="arrow-btn empty"></button>
+                <button class="arrow-btn up" id="btnUp">↑</button>
+                <button class="arrow-btn empty"></button>
+                <button class="arrow-btn left" id="btnLeft">←</button>
+                <button class="arrow-btn empty"></button>
+                <button class="arrow-btn right" id="btnRight">→</button>
+                <button class="arrow-btn empty"></button>
+                <button class="arrow-btn down" id="btnDown">↓</button>
+                <button class="arrow-btn empty"></button>
+            </div>
         </div>
     </div>
 
@@ -234,37 +344,57 @@
             drawGame();
         }
 
+        // Función para cambiar dirección
+        function changeDirection(newDx, newDy) {
+            if (!gameRunning) return;
+            
+            // Evitar movimiento inverso
+            if ((newDx !== 0 && dx !== -newDx) || (newDy !== 0 && dy !== -newDy)) {
+                dx = newDx;
+                dy = newDy;
+            }
+        }
+
         // Controles del teclado
         document.addEventListener('keydown', (e) => {
-            if (!gameRunning) return;
-
-            // Evitar movimiento inverso
             switch(e.key) {
                 case 'ArrowUp':
-                    if (dy !== 1) {
-                        dx = 0;
-                        dy = -1;
-                    }
+                    changeDirection(0, -1);
                     break;
                 case 'ArrowDown':
-                    if (dy !== -1) {
-                        dx = 0;
-                        dy = 1;
-                    }
+                    changeDirection(0, 1);
                     break;
                 case 'ArrowLeft':
-                    if (dx !== 1) {
-                        dx = -1;
-                        dy = 0;
-                    }
+                    changeDirection(-1, 0);
                     break;
                 case 'ArrowRight':
-                    if (dx !== -1) {
-                        dx = 1;
-                        dy = 0;
-                    }
+                    changeDirection(1, 0);
                     break;
             }
+        });
+
+        // Controles táctiles (botones)
+        document.getElementById('btnUp').addEventListener('click', () => changeDirection(0, -1));
+        document.getElementById('btnDown').addEventListener('click', () => changeDirection(0, 1));
+        document.getElementById('btnLeft').addEventListener('click', () => changeDirection(-1, 0));
+        document.getElementById('btnRight').addEventListener('click', () => changeDirection(1, 0));
+
+        // Soporte táctil para mejor respuesta en móviles
+        document.getElementById('btnUp').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            changeDirection(0, -1);
+        });
+        document.getElementById('btnDown').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            changeDirection(0, 1);
+        });
+        document.getElementById('btnLeft').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            changeDirection(-1, 0);
+        });
+        document.getElementById('btnRight').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            changeDirection(1, 0);
         });
 
         // Loop principal del juego
@@ -280,4 +410,3 @@
     </script>
 </body>
 </html>
-
